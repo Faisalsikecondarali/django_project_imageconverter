@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Converter</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container {
+            margin-top: 50px;
+        }
+
+        .tick-popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #d4edda;
+            color: #155724;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+
+.navbar-brand {
+    display: block;          /* Make the link a block-level element */
+    text-align: center;      /* Center the text horizontally */
+    color: #007bff;          /* Perfect color (you can change this) */
+    font-weight: bold;       /* Bold text for better visibility */
+    font-size: 1.5rem;       /* Adjust size as needed */
+    text-transform: uppercase; /* Optional: makes the text uppercase */
+   
+
+.navbar {
+    display: flex;
+    justify-content: center; /* Centers the navbar items horizontally */
+    align-items: center;     /* Centers the navbar items vertically */
+}
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Image Converter</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        {% comment %} <a class="nav-link active" href="#">Home</a> {% endcomment %}
+                    </li>
+                    {% comment %} <li class="nav-item">
+                        <a class="nav-link" href="#">About</a> {% endcomment %}
+                    </li>
+                    <li class="nav-item">
+                        {% comment %} <a class="nav-link" href="#">Contact</a> {% endcomment %}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 class="text-center">Image Converter</h1>
+        <p class="text-center">Convert your images to multiple formats quickly and easily!</p>
+        <form id="imageForm" class="mt-4">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="imageInput" class="form-label">Upload Image</label>
+                <input class="form-control" type="file" id="imageInput" accept="image/*" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="formatSelect" class="form-label">Select Format</label>
+                <select class="form-select" id="formatSelect" required>
+    <option value="png">PNG</option>
+    <option value="jpg">JPG</option>
+    <option value="jpeg">JPEG</option>
+    <option value="webp">WEBP</option>
+    <option value="bmp">BMP</option>
+    <option value="tiff">TIFF</option>
+    <option value="ico">ICO</option>
+    <option value="gif">GIF</option>
+</select>
+
+            </div>
+
+            <button type="submit" class="btn btn-primary">Convert</button>
+        </form>
+    </div>
+
+    <div class="tick-popup" id="tickPopup">
+        <strong>✔ Conversion Successful!</strong>
+    </div>
+
+    <footer class="bg-dark text-white text-center py-3 mt-5">
+        <p>&copy; This is created by Mr Developer .</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('imageForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+        
+            const imageInput = document.getElementById('imageInput');
+            const formatSelect = document.getElementById('formatSelect');
+        
+            if (imageInput.files.length === 0) {
+                alert('Please select an image to convert.');
+                return;
+            }
+        
+            const formData = new FormData();
+            formData.append('image', imageInput.files[0]);
+            formData.append('format', formatSelect.value);
+        
+            // Get CSRF token from the Django template
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+            try {
+                const response = await fetch('/convert-image', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: formData
+                });
+        
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `converted.${formatSelect.value}`;
+                    link.click();
+        
+                    showTickPopup();
+                } else {
+                    alert('Image conversion failed. Please try again.');
+                }
+            } catch (error) {
+                alert('Converted Keep Enjoy .');
+            }
+        });
+        
+    </script>
+</body>
+
+</html>
